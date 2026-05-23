@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, shrink-to-fit=no">
+    <meta property="og:title" content="Pico Environment Archive">
+    <meta property="og:description" content="Pico Environment Archive">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/img/icon.png">
+    <meta property="og:site_name" content="Pico Environment Archive">
+    <title>Environments | Pico Environment Archive Unofficial Backup</title>
+    <link rel="icon" type="image/png" href="/img/icon.png">
+    <link href="css/bootstrap.min_1544224878.css" rel="stylesheet">
+
+    <!-- Additional CSS -->
+    <style>
+        .theme-grid img {
+            background-color: transparent;
+            object-fit: cover;
+        }
+        .card-body img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            background-color: transparent;
+        }
+        #authorFilter {
+            background-color: #007bff; /* Matches Bootstrap primary color */
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem; /* Matches button padding */
+            border-radius: 0.25rem; /* Matches button border-radius */
+        }
+        #authorFilter:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Matches focus style */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">PicoEnv Unofficial Backup</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="https://github.com/Nyabsi/PicoThemeManager">Pico Theme Manager</a></li>
+                    <li class="nav-item"><a class="nav-link" href="https://https://picoenvironmentarchive.ct.ws/">Original Site</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Author Filter -->
+        <div class="text-center mb-3">
+            <label for="authorFilter" class="form-label d-block">Filter by Author:</label>
+            <select id="authorFilter" class="form-select btn btn-primary text-white" style="max-width: 300px; margin: 0 auto;">
+                <option value="all">All Authors</option>
+            </select>
+        </div>
+
+        <div class="theme-grid row justify-content-center" id="themeGrid"></div>
+        
+        <!-- Pagination Controls -->
+        <div class="text-center mt-3">
+            <button class="btn btn-primary" id="prevPageBtn" style="display: none;">Previous Page</button>
+            <button class="btn btn-primary" id="nextPageBtn">Next Page</button>
+        </div>
+    </div>
+
+    <footer class="mt-4 text-center">
+        <small>&copy; 2024 Pico Environment Archive | Backup by MrXiaoM at <a href="https://github.com/MrXiaoM/picoenvironmentarchive.ct.ws">Github</a></small>
+    </footer>
+
+    <script>
+        let currentPage = 1;
+        const themesPerPage = 8;
+        let allThemes = [];
+
+        // Load and filter themes
+        function loadThemes(page, authorFilter = "all") {
+            const themeGrid = document.getElementById('themeGrid');
+            themeGrid.innerHTML = '';
+            const startIndex = (page - 1) * themesPerPage;
+
+            const filteredThemes = authorFilter === "all"
+                ? allThemes
+                : allThemes.filter(theme => theme.author === authorFilter);
+
+            const themesToDisplay = filteredThemes.slice(startIndex, startIndex + themesPerPage);
+
+            themesToDisplay.forEach(theme => {
+                const themeCard = document.createElement('div');
+                themeCard.className = 'col-sm-6 col-md-4 col-lg-3 mb-3';
+
+                themeCard.innerHTML = `
+                    <div class="card bg-light">
+                        <div class="card-header">${theme.title}</div>
+                        <img src="/data/images/${theme.id}.webp" class="img-fluid" alt="${theme.title}" title="${theme.description}" width="960" height="800">
+                        <div class="card-footer d-flex justify-content-between">
+                            <span class="text-muted">${theme.author}</span>
+                            <a class="btn btn-primary btn-sm" href="${theme.downloadUrl}">Download</a>
+                        </div>
+                    </div>
+                `;
+
+                themeGrid.appendChild(themeCard);
+            });
+
+            document.getElementById('prevPageBtn').style.display = page > 1 ? 'inline-block' : 'none';
+            document.getElementById('nextPageBtn').disabled = startIndex + themesPerPage >= filteredThemes.length;
+        }
+
+        function populateAuthorFilter() {
+            const authorFilter = document.getElementById('authorFilter');
+            const authors = [...new Set(allThemes.map(theme => theme.author))];
+
+            authors.forEach(author => {
+                const option = document.createElement('option');
+                option.value = author;
+                option.textContent = author;
+                authorFilter.appendChild(option);
+            });
+
+            authorFilter.addEventListener('change', () => {
+                currentPage = 1;
+                loadThemes(currentPage, authorFilter.value);
+            });
+        }
+
+        fetch('data/themes.json')
+            .then(response => response.json())
+            .then(themes => {
+                allThemes = themes;
+                populateAuthorFilter();
+                loadThemes(currentPage);
+            })
+            .catch(error => console.error('Error loading themes:', error));
+
+        document.getElementById('nextPageBtn').addEventListener('click', () => {
+            currentPage++;
+            loadThemes(currentPage, document.getElementById('authorFilter').value);
+        });
+
+        document.getElementById('prevPageBtn').addEventListener('click', () => {
+            currentPage--;
+            loadThemes(currentPage, document.getElementById('authorFilter').value);
+        });
+    </script>
+
+    <script src="js/jquery.min_1500644593.js"></script>
+    <script src="js/bootstrap.min_1500644593.js"></script>
+</body>
+</html>
