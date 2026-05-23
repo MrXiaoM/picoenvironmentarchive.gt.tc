@@ -24,16 +24,19 @@
             display: block;
             background-color: transparent;
         }
-        #authorFilter {
-            background-color: #007bff; /* Matches Bootstrap primary color */
+        #authorFilter, #idFilter {
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 0.375rem 0.75rem; /* Matches button padding */
-            border-radius: 0.25rem; /* Matches button border-radius */
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
         }
-        #authorFilter:focus {
+        #authorFilter:focus, #idFilter:focus {
             outline: none;
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Matches focus style */
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        #idFilter::placeholder {
+            color: rgba(255, 255, 255, 0.75);
         }
     </style>
 </head>
@@ -54,12 +57,18 @@
     </nav>
 
     <div class="container-fluid mt-4">
-        <!-- Author Filter -->
-        <div class="text-center mb-3">
-            <label for="authorFilter" class="form-label d-block">Filter by Author:</label>
-            <select id="authorFilter" class="form-select btn btn-primary text-white" style="max-width: 300px; margin: 0 auto;">
-                <option value="all">All Authors</option>
-            </select>
+        <!-- Filters -->
+        <div class="row justify-content-center mb-3">
+            <div class="col-sm-6 col-md-4 col-lg-3 text-center mb-2">
+                <label for="authorFilter" class="form-label d-block">Filter by Author:</label>
+                <select id="authorFilter" class="form-select btn btn-primary text-white">
+                    <option value="all">All Authors</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-md-4 col-lg-3 text-center mb-2">
+                <label for="idFilter" class="form-label d-block">Filter by ID:</label>
+                <input id="idFilter" class="form-control btn btn-primary text-white" type="number" min="1" placeholder="All environments">
+            </div>
         </div>
 
         <div class="theme-grid row justify-content-center" id="themeGrid"></div>
@@ -80,17 +89,28 @@
         const themesPerPage = 8;
         let allThemes = [];
 
+        function getFilteredThemes() {
+            const authorFilter = document.getElementById('authorFilter').value;
+            const idFilter = document.getElementById('idFilter').value.trim();
+
+            return allThemes.filter(theme => {
+                const matchesAuthor = authorFilter === "all" || theme.author === authorFilter;
+                const matchesId = idFilter === '' || String(theme.id) === idFilter;
+                return matchesAuthor && matchesId;
+            });
+        }
+
         // Load and filter themes
-        function loadThemes(page, authorFilter = "all") {
+        function loadThemes(page) {
             const themeGrid = document.getElementById('themeGrid');
             themeGrid.innerHTML = '';
             const startIndex = (page - 1) * themesPerPage;
-
-            const filteredThemes = authorFilter === "all"
-                ? allThemes
-                : allThemes.filter(theme => theme.author === authorFilter);
-
+            const filteredThemes = getFilteredThemes();
             const themesToDisplay = filteredThemes.slice(startIndex, startIndex + themesPerPage);
+
+            if (themesToDisplay.length === 0) {
+                themeGrid.innerHTML = '<p class="text-muted text-center">No environments found.</p>';
+            }
 
             themesToDisplay.forEach(theme => {
                 const themeCard = document.createElement('div');
@@ -127,7 +147,16 @@
 
             authorFilter.addEventListener('change', () => {
                 currentPage = 1;
-                loadThemes(currentPage, authorFilter.value);
+                loadThemes(currentPage);
+            });
+        }
+
+        function setupidFilter() {
+            const idFilter = document.getElementById('idFilter');
+
+            idFilter.addEventListener('input', () => {
+                currentPage = 1;
+                loadThemes(currentPage);
             });
         }
 
@@ -136,18 +165,19 @@
             .then(themes => {
                 allThemes = themes;
                 populateAuthorFilter();
+                setupidFilter();
                 loadThemes(currentPage);
             })
             .catch(error => console.error('Error loading themes:', error));
 
         document.getElementById('nextPageBtn').addEventListener('click', () => {
             currentPage++;
-            loadThemes(currentPage, document.getElementById('authorFilter').value);
+            loadThemes(currentPage);
         });
 
         document.getElementById('prevPageBtn').addEventListener('click', () => {
             currentPage--;
-            loadThemes(currentPage, document.getElementById('authorFilter').value);
+            loadThemes(currentPage);
         });
     </script>
 
