@@ -1,6 +1,6 @@
 # Pico Environment Archive Backup
 
-There is a backup repository for PICO theme list from `https://picoenvironmentarchive.ct.ws/`.
+There is a backup repository for PICO theme list from `https://picoenvironmentarchive.gt.tc/`.
 
 All data collected from original site, I am not responsible for security.
 

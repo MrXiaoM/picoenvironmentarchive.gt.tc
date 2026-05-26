@@ -16,7 +16,7 @@ from PIL import Image
 import BrowserManagement
 
 
-BASE_URL = "https://picoenvironmentarchive.ct.ws/"
+BASE_URL = "https://picoenvironmentarchive.gt.tc/"
 THEMES_URL = urljoin(BASE_URL, "themes.json")
 ENVIRONMENT_URL_TEMPLATE = urljoin(BASE_URL, "environments/{id}.html")
 
